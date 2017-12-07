@@ -18,7 +18,7 @@
 6. parsing:
    val flightRdd=dataRdd.map(x=>x.split("\\,"))
 
-7. create case class
+7. create dataFrame
 
    case class Flight(
 	Month: Int,
@@ -42,4 +42,5 @@
 	CancellationCode: String,
 	Diverted: String) 
 
-   
+   val flightDF=flightRdd.map(l=>Flight(l(0).toInt,l(1).toInt,l(2).toInt,l(3).toInt,l(4).toInt,l(5),l(6).toInt,l(7),l(8).toInt,l(9).toInt,l(10).toInt,l(11).toInt,l(12),l(13),l(14).toInt,l(15).toInt,l(16).toInt,l(17),l(18),l(19))).toDF
+  
