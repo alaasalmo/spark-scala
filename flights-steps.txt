@@ -1,0 +1,21 @@
+1. hadoop fs -put flights.csv  /demo/data/flights/
+2. spark-shell --conf spark.ui.port=4545
+3. --Prepare sqlContext
+   import org.apache.spark.sql._
+   val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+   import sqlContext.implicits._
+
+4. -- Load
+   val rdd=sc.textFile("/demo/data/flights/flights.csv")
+   
+5. take out header
+   (I.) First    
+   val header = rdd.first
+   val dataRdd=rdd.filter(line=> line!=header)
+   (II.) Second
+   val dataRdd=rdd.zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}
+
+6. parsing:
+   val flightRdd=dataRdd.map(x=>x.split("\\,"))
+
+7.    
