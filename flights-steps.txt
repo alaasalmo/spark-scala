@@ -18,6 +18,28 @@
 6. parsing:
    val flightRdd=dataRdd.map(x=>x.split("\\,"))
 
-7. 
+7. create case class
+
+   case class Flight(
+	Month: Int,
+	DayofMonth: Int,
+	DayOfWeek: Int,
+	DepTime: Int,
+	ArrTime: Int,
+	UniqueCarrier: String,
+	FlightNum: Int,
+	TailNum: String,
+	ActualElapsedTime: Int,
+	AirTime: Int,
+	ArrDelay: Int,
+	DepDelay: Int,
+	Origin: String,
+	Dest: String,
+	Distance: Int,
+	TaxiIn: Int,
+	TaxiOut: Int,
+	Cancelled: String,
+	CancellationCode: String,
+	Diverted: String) 
 
    
