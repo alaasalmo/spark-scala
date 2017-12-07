@@ -18,4 +18,6 @@
 6. parsing:
    val flightRdd=dataRdd.map(x=>x.split("\\,"))
 
-7.    
+7. 
+
+   
