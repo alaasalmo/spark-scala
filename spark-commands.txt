@@ -1,0 +1,21 @@
+spark-shell --conf spark.ui.port=4545
+
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.SQLContext
+
+conf.set("spark.files.overwrite","true")
+
+val conf = new SparkConf(true)
+sc.stop
+val sc = new SparkContext(conf)
+val sqlContext = new SQLContext(sc)
+
+
+
+import scala.sys.process._
+
+"ls -l"!
+
+
+export SPARK_MAJOR_VERSION=2
+

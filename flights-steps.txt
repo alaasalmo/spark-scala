@@ -43,4 +43,36 @@
 	Diverted: String) 
 
    val flightDF=flightRdd.map(l=>Flight(l(0).toInt,l(1).toInt,l(2).toInt,l(3).toInt,l(4).toInt,l(5),l(6).toInt,l(7),l(8).toInt,l(9).toInt,l(10).toInt,l(11).toInt,l(12),l(13),l(14).toInt,l(15).toInt,l(16).toInt,l(17),l(18),l(19))).toDF
-  
+
+8. Using command to create DataFrame (instead of step 7)
+   
+   import org.apache.spark.sql.types.{StructType,StructField,StringType,IntegerType}
+   import org.apache.spark.sql.Row
+   
+   val flightRW=flightRdd.map(l=>Row(l(0).toInt,l(1).toInt,l(2).toInt,l(3).toInt,l(4).toInt,l(5),l(6).toInt,l(7),l(8).toInt,l(9).toInt,l(10).toInt,l(11).toInt,l(12),l(13),l(14).toInt,l(15).toInt,l(16).toInt,l(17),l(18),l(19)))
+   val flightSchema = StructType(Array(StructField("Month", IntegerType, false),StructField("DayofMonth", IntegerType, false),StructField("DayOfWeek", IntegerType, false),StructField("DepTime", IntegerType, false),StructField("ArrTime", IntegerType, false),StructField("UniqueCarrier", StringType, false),StructField("FlightNum", IntegerType, false),StructField("TailNum", StringType, false),StructField("ActualElapsedTime", IntegerType, false),StructField("AirTime", IntegerType, false),StructField("ArrDelay", IntegerType, false),StructField("DepDelay", IntegerType, false),StructField("Origin", StringType, false),StructField("Dest", StringType, false),StructField("Distance", IntegerType, false),StructField("TaxiIn", IntegerType, false),StructField("TaxiOut", IntegerType, false),StructField("Cancelled", StringType, false),StructField("CancellationCode", StringType, false),StructField("Diverted", StringType, false)))
+   val peopleDataFrame = sqlContext.createDataFrame(flightRW, flightSchema)
+
+9. Save the dataframe as a "parquet" file to the HDFS
+   peopleDataFrame.write.format("parquet").save("/demo/data/flights/parquet")
+
+10. val dfflight = sqlContext.read.format("parquet").load("/demo/data/flights/parquet")
+
+11. Find the highest average delays by airport origin: dfflight.select($"Origin", $"DepDelay").//Try to finish
+
+    dfflight.select($"Origin", $"DepDelay").groupBy($"Origin").avg("DepDelay").sort(desc("avg(DepDelay)")).show(5)
+	dfflight.select($"Origin", $"DepDelay").groupBy($"Origin").avg("DepDelay").withColumnRenamed("avg(DepDelay)","DelayAvg").sort(desc("DelayAvg")).show(5)
+	
+12. Create a UDF to check if the flight is delayed or not:
+    
+	I.
+	
+    def delay_check(x:Int) : Int = {
+        if(x>0) return 1
+        else return 0
+    }
+
+    val depUDF = udf((x: Int) => delay_check(x))
+	
+    II. Select the columns using the UDF to check if a flight was delayed or not:
+	    
