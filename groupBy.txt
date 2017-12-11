@@ -1,0 +1,22 @@
+1.  --Prepare sqlContext
+     import org.apache.spark.sql._
+     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+     import sqlContext.implicits._
+2. val dfflight = sqlContext.read.format("parquet").load("/demo/data/flights/parquet")
+3. dfflight.select("UniqueCarrier","FlightNum").groupBy("UniqueCarrier").count().show
+4. dfflight.groupBy("UniqueCarrier").max("FlightNum").show
+5. dfflight.groupBy("UniqueCarrier","TailNum").count().show
+6. dfflight.groupBy("UniqueCarrier","TailNum").count().withColumnRenamed("count","c").show
+7. dfflight.groupBy("UniqueCarrier","TailNum").agg(sum("FlightNum"),count("FlightNum")).show
+8. dfflight.groupBy("UniqueCarrier","TailNum").agg(sum("FlightNum").alias("sum"),avg("FlightNum").alias("avg")).show
+9. dfflight.groupBy($"UniqueCarrier").agg("FlightNum" -> "sum", "FlightNum" -> "count").show
+10. dfflight.groupBy("UniqueCarrier","TailNum").agg(sum("FlightNum").alias("sum"),avg("FlightNum").alias("avg")).sort(desc("sum")).show
+11. dfflight.groupBy("UniqueCarrier","TailNum").agg(sum("FlightNum").alias("sum"),avg("FlightNum").alias("avg")).sort($"sum".desc).show
+12. dfflight.groupBy("UniqueCarrier","TailNum").agg(sum("FlightNum").cast("String"),avg("FlightNum").cast("String")).sort($"sum".desc).show
+
+
+
+casting:
+dfflight.select($"FlightNum".cast("string")).show
+dfflight.groupBy($"UniqueCarrier",$"TailNum").agg(sum("$FlightNum").cast("String"),avg($"FlightNum").cast("String")).show
+dfflight.select($"UniqueCarrier",$"TailNum",concat($"DayOfWeek".cast("string"),lit("*"))).show

@@ -75,4 +75,9 @@
     val depUDF = udf((x: Int) => delay_check(x))
 	
     II. Select the columns using the UDF to check if a flight was delayed or not:
-	    
+
+	 val delayDF = dfflight.select($"UniqueCarrier",depUDF("DepDelay").alias("IsDelay"),$"DepDelay")
+
+    III. Using groupBy, and the agg operator, create a count of the DepDelay to get total number of flights, and a sum of the IsDelayed Column:
+
+    delayDF.groupBy("UniqueCarrier").agg("UniqueCarrier",count("IsDelay"),

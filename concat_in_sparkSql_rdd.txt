@@ -1,9 +1,13 @@
-1. val dfflight = sqlContext.read.format("parquet").load("/demo/data/flights/parquet")
-2. dfflight.select($"Month",$"DayofMonth",$"DayOfWeek",$"DepTime",$"ArrTime",lit("xx")).show
-3. dfflight.select($"Month",$"DayofMonth",$"DayOfWeek",$"DepTime",$"ArrTime",lit("xx".concat("tt"))).show
-4. build function:
+1.  --Prepare sqlContext
+   import org.apache.spark.sql._
+   val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+   import sqlContext.implicits._
+2. val dfflight = sqlContext.read.format("parquet").load("/demo/data/flights/parquet")
+3. dfflight.select($"Month",$"DayofMonth",$"DayOfWeek",$"DepTime",$"ArrTime",lit("xx")).show
+4. dfflight.select($"Month",$"DayofMonth",$"DayOfWeek",$"DepTime",$"ArrTime",lit("xx".concat("tt"))).show
+5. build function:
    def dateFormat(day:Int,month:Int,year:Int):String = { year.toString.concat("-").concat(month.toString).concat("-").concat(day.toString)}
    val depUDF = udf((day:Int,month:Int,year:Int) => dateFormat(day,month,year))
-5. dfflight.select($"Month",$"DayofMonth",$"DayOfWeek",$"DepTime",$"ArrTime",depUDF(dfflight("DayofMonth"),dfflight("Month"),lit(1971))).show
+6. dfflight.select($"Month",$"DayofMonth",$"DayOfWeek",$"DepTime",$"ArrTime",depUDF(dfflight("DayofMonth"),dfflight("Month"),lit(1971))).show
 
 
