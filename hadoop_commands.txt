@@ -1,0 +1,11 @@
+
+
+
+--Devide File (put it hdfs)
+hadoop fs -cat /tmp/test/mymapping.psv | head -n 3 | hadoop fs -put - /tmp/test/myfile.txt
+
+--Devide File (put it physical path)
+hadoop fs -cat /tmp/test/mymapping.psv | head -n 3 > myfile.txt
+
+--Merge files
+hadoop fs -text /tmp/test2/part-* | hadoop fs -put - /tmp/test3/input/ipv_data_output.psv

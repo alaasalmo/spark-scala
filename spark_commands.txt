@@ -1,0 +1,137 @@
+val schema = StructType(
+    StructField("Emp_ID", LongType, true) ::
+    StructField("Emp_Name", StringType, false) ::
+    StructField("Emp_Salary", LongType, false) :: Nil)
+	
+	
+var dataRDD = sc.emptyRDD[Row]
+val newDFSchema = sqlContext.createDataFrame(dataRDD, schema)
+
+
+
+
+
+
+val rdd = sc.parallelize(
+  Seq(
+    ("first", Array(2.0, 1.0, 2.1, 5.4)),
+    ("test", Array(1.5, 0.5, 0.9, 3.7)),
+    ("choose", Array(8.0, 2.9, 9.1, 2.5))
+  )
+)
+val dfWithoutSchema = spark.createDataFrame(rdd)
+
+
+
+val dfWithSchema = spark.createDataFrame(rdd).toDF("id", "vals")
+dfWithSchema.show()
+
+
+
+import org.apache.spark.sql.functions._ 
+val df = sc.parallelize(Seq(("Databricks", 20000), ("Spark", 100000), ("Hadoop", 3000))).toDF("word", "count") 
+df.withColumn("uniqueID",monotonicallyIncreasingId).show()
+
+
+
+
+val someData = Seq(
+  Row(8, "bat"),
+  Row(64, "mouse"),
+  Row(-27, "horse")
+)
+
+val someSchema = List(
+  StructField("number", IntegerType, true),
+  StructField("word", StringType, true)
+)
+
+val someDF = sqlContext.createDataFrame(
+  sc.parallelize(someData),
+  StructType(someSchema)
+)
+
+
+
+Option(1):
+>case class Person(Name: String , Age: Int)
+>val personDF = Seq(Person("Ray", 23), Person("John",44)).toDF
+>df.show()
+
+Option(2):
+>val rowsRdd: RDD[Row] = sc.parallelize(Seq(Row("John", 27), Row("Eric", 25) ))
+>val schema = new StructType().add(StructField("Name", StringType, true)).add(StructField("Age", IntegerType, true))
+>val df = sqlContext.createDataFrame(rowsRdd, schema)
+
+
+At a high level, there are two kinds of optimizations. First, Catalyst applies logical optimizations such as predicate pushdown. 
+The optimizer can push filter predicates down into the data source, enabling the physical execution to skip irrelevant data. Second, 
+Catalyst compiles operations into physical plans for execution and generates JVM bytecode for those plans that is often 
+more optimized than hand-written code.
+
+
+<Write JSON with Schema>
+
+val events = sc.parallelize(
+  """{"action":"create","timestamp":1452121277}""" ::
+  """{"action":"create","timestamp":"1452121277"}""" ::
+  """{"action":"create","timestamp":""}""" ::
+  """{"action":"create","timestamp":null}""" ::
+  """{"action":"create","timestamp":"null"}""" ::
+  Nil
+)
+
+val schema = (new StructType).add("action", StringType).add("timestamp", LongType)
+
+sqlContext.read.schema(schema).json(events).show
+
+
+
+al checkinsWithHoods = checkRdd.mapPartitions({row => row.map(x => (x._1, x._2, broadcastedHoods.value.getOrElse(x._2, -1)))}, preservesPartitioning = true)
+
+
+
+
+val rdd1 =  sc.parallelize(List("yellow","red","blue","cyan","black"),3)
+
+
+
+ val mapped =   rdd1.mapPartitionsWithIndex{ (index, iterator) => { println("Called in Partition -> " + index);val myList = iterator.toList;myList.map(x => x + " -> " + index).iterator } }
+
+ 
+ 
+ 
+ 
+
+Chase,Dotson
+Emily,Mccall
+Mason,Haynes
+Anna,Greer
+Sophia,Stephenson
+
+case class people(val first_name:String, val last_name:String)
+val linesRDD= sc.textFile("/tmp/test/people.txt")
+
+
+
+
+{"first_name":"Chase","last_name":"Dotson"}
+{"first_name":"Emily","last_name":"Mccall"}
+{"first_name":"Mason","last_name":"Haynes"}
+{"first_name":"Anna","last_name":"Greer"}
+{"first_name":"Sophia","last_name":"Stephenson"}
+
+
+ 
+
+val df1 = sc.parallelize([Row(cid='101', name='Alice', age=25, state='ca'), Row(cid='102', name='Bob', age=15, state='ny'), Row(cid='103', name='Bob', age=23, state='nc'), Row(cid='104', name='Ram', age=45, state='fl')]).toDF()	
+ 
+ 
+sqlContext.sql("LOAD DATA INPATH '/tmp/test/sample_07.csv' OVERWRITE INTO TABLE sample_07")
+
+
+
+
+
+
+	  
