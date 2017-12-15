@@ -83,3 +83,7 @@
     delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay"),count("IsDelay")).show
 
     delayDF.groupBy("UniqueCarrier").agg("DepDelay" -> "sum","IsDelay" -> "count").show
+
+    delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay").alias("dep"),count("IsDelay").alias("isd")).sort(desc("dep"))show
+    
+    
