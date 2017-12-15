@@ -122,3 +122,11 @@
     
     dfflight.select($"UniqueCarrier",$"Distance").groupBy($"UniqueCarrier").avg().sort($"AVG(Distance)".desc).show(5)
     
+    6. a. Find the top 5 airports with the largest average taxi time in.
+    
+    dfflight.groupBy("Origin").avg("TaxiIn").withColumnRenamed("avg(TaxiIn)","AvbTaxiIn").sort(desc("AvbTaxiIn")).show(5)
+
+    6. b. Find the top 5 airports with the shortest average taxi time out.
+    
+    dfflight.groupBy("Origin").avg("TaxiOut").withColumnRenamed("avg(TaxiOut)","AvbTaxiOut").sort(desc("AvbTaxiOut")).show(5)
+    
