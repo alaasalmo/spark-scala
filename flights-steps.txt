@@ -92,4 +92,8 @@
 
     val calc_percent = udf((s: Int, c: Int) => s.toFloat/c)
     
-    V.
+    V. Create the final DataFrame by using a select, the UDF, and a sort, then show it:
+
+    delayGroupDF.select($"UniqueCarrier",calc_percent($"sum(DepDelay)",$"count(IsDelay)").alias("Percentage")).sort("Percentage").show()
+    
+    
