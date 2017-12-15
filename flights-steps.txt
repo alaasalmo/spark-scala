@@ -88,4 +88,8 @@
     
     val delayGroupDF=delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay"),count("IsDelay"))
     
-    
+    IV. Create a UDF to get the percentage of delayed flights:
+
+    val calc_percent = udf((s: Int, c: Int) => s.toFloat/c)
+    
+    V.
