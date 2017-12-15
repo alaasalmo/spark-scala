@@ -96,4 +96,6 @@
 
     delayGroupDF.select($"UniqueCarrier",calc_percent($"sum(DepDelay)",$"count(IsDelay)").alias("Percentage")).sort("Percentage").show()
     
-    
+    c.  CHALLENGE: Find the top 5 airlines with longest average flight distance.
+    
+    delayDF.groupBy("UniqueCarrier").avg("DepDelay").withColumnRenamed("avg(DepDelay)","DelayAvg").sort(desc("DelayAvg")).show(5)
