@@ -98,4 +98,27 @@
     
     c.  CHALLENGE: Find the top 5 airlines with longest average flight distance.
     
-    delayDF.groupBy("UniqueCarrier").avg("DepDelay").withColumnRenamed("avg(DepDelay)","DelayAvg").sort(desc("DelayAvg")).show(5)
+    
+    
+    delayDF.groupBy("UniqueCarrier").agg("DepDelay" -> "sum","IsDelay" -> "count").show
+
+    delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay").alias("dep"),count("IsDelay").alias("isd")).sort(desc("dep"))show
+    
+    val delayGroupDF=delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay"),count("IsDelay"))
+    
+    IV. Create a UDF to get the percentage of delayed flights:
+
+    val calc_percent = udf((s: Int, c: Int) => s.toFloat/c)
+    
+    V. Create the final DataFrame by using a select, the UDF, and a sort, then show it:
+
+    delayGroupDF.select($"UniqueCarrier",calc_percent($"sum(DepDelay)",$"count(IsDelay)").alias("Percentage")).sort("Percentage").show()
+    
+    c.  CHALLENGE: Find the top 5 airlines with longest average flight distance.
+    
+    dfflight.groupBy("UniqueCarrier").avg("Distance").withColumnRenamed("avg(Distance)","DisAvg").sort(desc("DisAvg")).show(5)
+    
+    or
+    
+    dfflight.select($"UniqueCarrier",$"Distance").groupBy($"UniqueCarrier").avg().sort($"AVG(Distance)".desc).show(5)
+    
