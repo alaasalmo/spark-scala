@@ -81,3 +81,5 @@
     III. Using groupBy, and the agg operator, create a count of the DepDelay to get total number of flights, and a sum of the IsDelayed Column:
 
     delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay"),count("IsDelay")).show
+
+    delayDF.groupBy("UniqueCarrier").agg("DepDelay" -> "sum","IsDelay" -> "count").show
