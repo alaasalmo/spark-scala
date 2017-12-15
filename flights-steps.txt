@@ -86,4 +86,6 @@
 
     delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay").alias("dep"),count("IsDelay").alias("isd")).sort(desc("dep"))show
     
+    val delayGroupDF=delayDF.groupBy("UniqueCarrier").agg(sum("DepDelay"),count("IsDelay"))
+    
     
