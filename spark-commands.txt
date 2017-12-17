@@ -19,3 +19,8 @@ import scala.sys.process._
 
 export SPARK_MAJOR_VERSION=2
 
+Kill 4040
+
+sudo netstat -plten |grep 4040
+
+kill -9 (xxxxx)/java
