@@ -1,0 +1,116 @@
+case (1): RDD
+
+val data=sc.textFile("/tmp/flights.csv").map(line=>line.replace("\"","")).zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,"))
+
+val dataRDD=data.map(x=>(x(5),(x(10).toInt,x(11).toInt)))
+
+find the total for ArrDelay, DepDelay
+val dataReduced=dataRDD.reduceByKey{case (x,y)=> (x._1+y._1,x._2+y._2) } 
+
+find for min(ArrDelay), max(DepDelay)
+val dataMinMaxReduced=dataRDD.reduceByKey{case (x,y)=> (math.max(x._1,y._1),math.max(x._2,y._2)) } 
+
+
+find UniqueCarrier(5), Origin(12)
+
+//val dataRDD=data.map(x=>(x(5),(x(7),1))).distinct
+
+val dataRDD=data.map(x=>(x(5),(x(7),1)))
+val filtered = dataRDD.filter(x=>x._1==x._2._1.substring(x._2._1.length-2))
+val dataFiltered = filtered.map(x=> (x._1,x._2._2)).reduceByKey(_+_)
+
+val data2=sc.textFile("/tmp/carriers.csv").map(line=>line.replace("\"","")).zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,")).map(x=>(x(0),x(1)))
+
+val joinedData=dataFiltered.join(data2)
+
+joinedData.map{ case(x,y)=>(x,y._1,y._2)}.collect
+
+joinedData.map{ case(x,y)=>(x,y._1,y._2)}.sortBy(x=>x._2,false).collect
+
+case (2):
+
+val data=sc.textFile("/tmp/flights.csv").map(line=>line.replace("\"","")).zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,"))
+val dataRW=data.map(x=>Row(x(5),x(7),1))
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType};
+val flightsSchema = StructType(Array(StructField("UniqueCarrier", StringType, true),StructField("TailNum", StringType, true),StructField("countV", IntegerType, true)));
+
+//Build DataFrame
+val flightsDF = sqlContext.createDataFrame(dataRW,flightsSchema)
+
+val data2=sc.textFile("/tmp/carriers.csv").map(line=>line.replace("\"","")).zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,")).map(x=>(Row(x(0),x(1))))
+val carriersSchema = StructType(Array(StructField("Code", StringType, true),StructField("Description", StringType, true)));
+val carriersDF = sqlContext.createDataFrame(data2,carriersSchema)
+
+
+val results=flightsDF.select($"UniqueCarrier",$"TailNum".substr(length($"TailNum")-1,length($"TailNum")).alias("length"),$"countV").filter($"UniqueCarrier"===$"length")
+val groupDF=results.groupBy($"UniqueCarrier").count
+val joinedDF=groupDF.join(carriersDF,groupDF("UniqueCarrier")=carriersDF("Code"))
+
+
+//val results2=results.distinct
+
+case 3:
+
+val data=sc.textFile("/tmp/flights.csv").map(line=>line.replace("\"","")).zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,"))
+val dataRW=data.map(x=>Row(x(5),x(7),1))
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType};
+val flightsSchema = StructType(Array(StructField("UniqueCarrier", StringType, true),StructField("TailNum", StringType, true),StructField("countV", IntegerType, true)));
+
+val flightsDF = sqlContext.createDataFrame(dataRW,flightsSchema)
+
+flightsDF.createOrReplaceTempView("flights")
+
+val data2=sc.textFile("/tmp/carriers.csv").map(line=>line.replace("\"","")).zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,")).map(x=>(Row(x(0),x(1))))
+val carriersSchema = StructType(Array(StructField("Code", StringType, true),StructField("Description", StringType, true)));
+val carriersDF = sqlContext.createDataFrame(data2,carriersSchema)
+
+carriersDF.createOrReplaceTempView("carriers")
+
+
+sqlContext.sql("select * from (select UniqueCarrier,count(1),TailNum from flights where UniqueCarrier=substr(TailNum,length(TailNum)-1,2) group by UniqueCarrier,TailNum) as temp inner join carriers on (flights.UniqueCarrier=carriers.Code)").show
+
+
+
+sqlContext.sql("select * from (select UniqueCarrier,count(1) as countV from flights where UniqueCarrier=substr(TailNum,length(TailNum)-1,2) group by UniqueCarrier) as temp inner join carriers on (temp.UniqueCarrier=carriers.Code)").show
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def GetTwoChar(): Unit = {
+  val sqlContext: SQLContext = new org.apache.spark.sql.SQLContext(sc)
+
+  // dummy data
+  val r1 = Input("mkda2")
+  val r2 = Input("xksj1")
+
+  val records = Seq(r1, r2)
+  val df = sqlContext.createDataFrame(records)
+
+  df.select(regexp_extract(df.col("text"), ".*([A-Za-z0-9]{2}$)", 1) as "twochars").show()
+}
+
+case class Input(text: String)
