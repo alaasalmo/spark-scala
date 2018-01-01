@@ -1,0 +1,11 @@
+
+00- sc.setCheckpointDir("hdfs://somedir/")
+
+1. var data = sc.parallelize(Array(1,2,3,4,5))
+2. data.toDebugString()
+3. for(i <- 1 until 100)
+   
+   for (i <- 1 to 1000){ data=data.map(i=> i+1); if (i%7 == 0) { data.checkpoint(); data.count() } }
+   
+   
+   data.toDebugString()
