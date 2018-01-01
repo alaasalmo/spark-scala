@@ -44,7 +44,7 @@ val carriersDF = sqlContext.createDataFrame(data2,carriersSchema)
 
 val results=flightsDF.select($"UniqueCarrier",$"TailNum".substr(length($"TailNum")-1,length($"TailNum")).alias("length"),$"countV").filter($"UniqueCarrier"===$"length")
 val groupDF=results.groupBy($"UniqueCarrier").count
-val joinedDF=groupDF.join(carriersDF,groupDF("UniqueCarrier")=carriersDF("Code"))
+val joinedDF=groupDF.join(carriersDF,groupDF("UniqueCarrier")===carriersDF("Code"))
 
 
 //val results2=results.distinct
