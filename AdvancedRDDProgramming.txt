@@ -1,0 +1,76 @@
+
+3. (a) The first goal of this lab is to find top 3 airlines with the most flights
+
+   val flightsRDD= sc.textFile("/tmp/flights.csv")
+   val flightDataRDD= flightsRDD.zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,"))
+   val flightPairRDD=flightDataRDD.map(x=>(x(5),1))
+   val flightReduceRDD = flightPairRDD.reduceByKey{(x,y)=>(x+y)}
+   val flightSorrted = flightReduceRDD.map(x=>(x._2,x._1)).sortByKey(false).map(x=>(x._2,x._1))
+   flightSorrted.take(3)
+   
+   Another solution:
+   
+   val carrierReduce = carrierRdd.reduceByKey((a,b) => a+b)
+   val carriersSorted = carrierReduce.map{case (a,b) => (b,a)}.sortByKey(false)
+   carriersSorted.take(3)
+   
+4. Find the top 5 most common routes, between two cities
+   
+       val flightCommonPairRouteRDD=flightDataRDD.map(x=>((x(12),x(13)),1))
+       val flightCommonReducedRDD=flightCommonPairRouteRDD.reduceByKey{(a,b) => a+b}.map{ case(x,y)=>(y,x)}.sortByKey(false).map{ case(x,y)=>(y,x)}
+	   
+	   Another solution:
+	   val flightCommonReducedRDD=flightCommonPairRouteRDD.reduceByKey{(a,b) => a+b}.sortBy(_._2,false).map{ case(x,y)=>(y,x)}
+	   
+	   val flightSortted=flightCommonReducedRDD.map{case(x,y)=>(y._1,y._2)}
+	   
+	
+       Get Airports:
+       val airportsRDD = sc.textFile("/tmp/airports.csv").map(line=>line.replace("\"","")).zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}.map(line=>line.split("\\,"))
+       val airportPair = airportsRDD.map(col=>(col(0),col(2)))
+	   
+	   val flightJoinRDD = flightSortted.join(airportPair)
+	   
+	   val flightJoin1=flightJoinRDD.map{case (a,b) => (b._1,b._2)}
+	   val flightJoin2=flightJoin1.join(airportPair).map{case (a,b) => (b._1,b._2)}
+	   
+	   flightJoin2.take(5)
+	   
+5. CHALLENGE: Find the longest departure delay for each airline if its over 15 minutes
+
+       import java.lang.Math
+
+       val filteredFlightRDD=flightDataRDD.filter(col=>col(11).toFloat>15)
+	   val flightPairRDD=filteredFlightRDD.map(col=> (col(5),col(11).toInt))
+       val finalResult=flightPairRDD.reduceByKey((x,y)=>math.max(x,y))
+	   
+6. CHALLENGE: Find the most common airplane model for flights over 1500 miles    
+	
+	   val rdd=sc.textFile("/tmp/plane.csv")
+       val rddfiltered=rdd.map(c=>c.split("\\,"))
+       val rddfilteredNoH=rddfiltered.zipWithIndex.filter{case (x,i)=> i!=0}.map{case (x,i)=>x}
+       val f=rddfilteredNoH.filter(t=>t.length==9)
+       val planePairRDD = f.map(col=>(col(0),col(4)))
+      	   
+       val flightPairRDD=flightDataRDD.filter(col=>col(14).toInt>1500).map(col=>(col(7),1))
+	   
+	   val resultRDD=flightPairRDD.join(planePairRDD)
+	   
+	   val resultRDD2=resultRDD.map{case(x,y)=>(y._2,y._1)}
+	   
+	   val resultSorttedRDD=resultRDD2.reduceByKey((x,y)=>(x+y)).sortBy(_._2,false)
+	   
+	   
+	   
+	   val flightReducedRDD=flightPairRDD.reduceByKey{ case (x,y)=>(x+y)}
+	   
+	   Another solution
+	   val flightReducedRDD=flightPairRDD.reduceByKey((x,y)=>(x+y))
+	   
+	   val flightSortted=flightReducedRDD.sortBy(_._2,false) 
+	   
+	   val resultRDD=flightSortted.join(planePairRDD)
+	   
+	   resultRDD.take(2)
+	   
+	   
