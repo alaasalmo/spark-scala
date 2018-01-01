@@ -1,0 +1,111 @@
+import org.apache.spark.sql._ 
+val sqlContext = new org.apache.spark.sql.SQLContext(sc) 
+import sqlContext.implicits._ 
+
+
+
+(1) Read string
+
+val events = sc.parallelize(
+  """{"itemNo" : 1, "name" : "ferrari", "speed" : 259 , "weight": 800}""" ::
+  """{"itemNo" : 2, "name" : "jaguar", "speed" : 274 , "weight":998}""" ::
+  """{"itemNo" : 3, "name" : "mercedes", "speed" : 340 , "weight": 1800}""" ::
+  """{"itemNo" : 4, "name" : "audi", "speed" : 345 , "weight": 875}""" ::
+  """{"itemNo" : 5, "name" : "lamborghini", "speed" : 355 , "weight": 1490}""" ::
+  """{"itemNo" : 6, "name" : "chevrolet", "speed" : 260 , "weight": 900}""" ::
+  """{"itemNo" : 7, "name" : "ford", "speed" : 250 , "weight": 1061}""" ::
+  """{"itemNo" : 8, "name" : "porche", "speed" : 320 , "weight": 1490}""" ::
+  """{"itemNo" : 9, "name" : "bmw", "speed" : 325 , "weight": 1190}""" ::
+  """{"itemNo" : 10, "name" : "mercedes-benz", "speed" : 312 , "weight": 1567}""" ::Nil)
+
+
+import org.apache.spark.sql.types.{StructType, StringType, LongType, IntegerType}
+
+val schema = (new StructType).add("itemNo", IntegerType).add("name", StringType).add("speed", IntegerType).add("weight", IntegerType)
+
+sqlContext.read.schema(schema).json(events).show
+
+
+
+
+(2) Reading from file
+
+{"itemNo" : 1, "name" : "ferrari", "speed" : 259 , "weight": 800}
+{"itemNo" : 2, "name" : "jaguar", "speed" : 274 , "weight":998}
+{"itemNo" : 3, "name" : "mercedes", "speed" : 340 , "weight": 1800}
+{"itemNo" : 4, "name" : "audi", "speed" : 345 , "weight": 875}
+{"itemNo" : 5, "name" : "lamborghini", "speed" : 355 , "weight": 1490}
+{"itemNo" : 6, "name" : "chevrolet", "speed" : 260 , "weight": 900}
+{"itemNo" : 7, "name" : "ford", "speed" : 250 , "weight": 1061}
+{"itemNo" : 8, "name" : "porche", "speed" : 320 , "weight": 1490}
+{"itemNo" : 9, "name" : "bmw", "speed" : 325 , "weight": 1190}
+{"itemNo" : 10, "name" : "mercedes-benz", "speed" : 312 , "weight": 1567}
+ 
+val input = sqlContext.read.json("/tmp/cars1.json")
+
+
+(3) Reading from file
+
+vi baby_names.json
+
+[{
+	"Year": "2013",
+	"First Name": "DAVID",
+	"County": "KINGS",
+	"Sex": "M",
+	"Count": "272"
+}, {
+	"Year": "2013",
+	"First Name": "JAYDEN",
+	"County": "KINGS",
+	"Sex": "M",
+	"Count": "268"
+}, {
+	"Year": "2013",
+	"First Name": "JAYDEN",
+	"County": "QUEENS",
+	"Sex": "M",
+	"Count": "219"
+}, {
+	"Year": "2013",
+	"First Name": "MOSHE",
+	"County": "KINGS",
+	"Sex": "M",
+	"Count": "219"
+}, {
+	"Year": "2013",
+	"First Name": "ETHAN",
+	"County": "QUEENS",
+	"Sex": "M",
+	"Count": "216"
+}]
+
+
+/tmp/baby_names.json
+
+val jsonRDD = sc.wholeTextFiles("/tmp/baby_names.json")
+val namesJson = sqlContext.read.format("json").load("/tmp/baby_names.json")
+val df = sqlContext.jsonFile("/tmp/baby_names.json")
+
+
+
+val jsonRDD = sc.wholeTextFiles("/tmp/baby_names.json").map(x => x._2)
+val namesJson = sqlContext.read.json(jsonRDD)
+
+
+
+
+
+http://ip.jsontest.com
+
+
+import scalaj.http._
+val response = Http("proto:///path/to/json")
+  .header("key", "val").method("get")
+  .execute().asString.body
+
+
+
+val response = Http("http://ip.jsontest.com").header("key", "val").method("get").execute().asString.body
+
+val request: Http.Request = IOUtils.toString(Http("http://ip.jsontest.com"),Charset.forName("utf8"))

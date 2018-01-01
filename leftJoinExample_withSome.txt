@@ -1,0 +1,100 @@
+Example(1):
+
+val a: List[Any] = List["33","44"]
+val b = a.asInstanceOf[String].toInt
+
+
+Example(2):
+
+import scala.collection.mutable.ListBuffer
+
+def acc(l1:List[Any]):List[Int]= {
+
+var initialList = new ListBuffer[Int]()
+
+for(ll1<-l1)
+{
+  val b = ll1.asInstanceOf[List[Int]]
+  
+  for(v:Int<-b)
+  {
+   initialList+=v
+  }
+}
+initialList.toList.distinct
+}
+
+
+val pairs = sc.parallelize(Array(("math",List(55, 60)), ("math",List(55, 65)), ("math",List(56, 60)), ("math",List(56, 65)), ("science",List(59, 61)), ("science",List(59, 62)), ("science",List(54, 61)), ("science",List(54, 62)), ("english",List(57, 0)), ("english",List(58, 0))))
+val results=pairs.aggregateByKey(List[Any]())((aggr, value) => aggr ::: (value :: Nil), (aggr1, aggr2) => aggr1 ::: aggr2)
+
+results.mapValues(x=>acc(x)).collect
+
+
+Example(3):
+
+val rdd1 = sc.parallelize(Seq(
+     |                ("math",    55),
+     |                ("math",    56),
+     |                ("english", 57),
+     |                ("english", 58),
+     |                ("science", 59),
+     |                ("science", 54)))
+	 
+
+val rdd2 = sc.parallelize(Seq(
+     |                ("math",    60),
+     |                ("math",    65),
+     |                ("science", 61),
+     |                ("science", 62),
+     |                ("history", 63),
+     |                ("history", 64)))
+
+
+
+val joined = rdd1.join(rdd2)
+
+joined.collect
+
+
+import scala.collection.mutable.ListBuffer
+
+def acc(l1:List[Any]):List[Int]= {
+
+var initialList = new ListBuffer[Int]()
+
+for(ll1<-l1)
+{
+  val b = ll1.asInstanceOf[List[Int]]
+  
+  for(v:Int<-b)
+  {
+   initialList+=v
+  }
+}
+initialList.toList.distinct
+}
+
+def removeSome(s:(Int,Option[Int])):List[Int] =
+{
+  val s1:Int=s._1
+  val s2:Int=try {
+      s._2.get
+  }
+  catch
+  {
+   case e: Exception => 0
+  }
+  
+  s1::s2::Nil
+}
+
+val leftJoined = rdd1.leftOuterJoin(rdd2)
+
+val leftJoined2=leftJoined.mapValues(x=>removeSome(x))
+
+
+val results=leftJoined2.aggregateByKey(List[Any]())((aggr, value) => aggr ::: (value :: Nil), (aggr1, aggr2) => aggr1 ::: aggr2)
+
+results.mapValues(x=>acc(x)).collect
+

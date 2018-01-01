@@ -1,0 +1,33 @@
+sudo netstat -plten |grep 4040
+kill -9 XXXXXX
+
+import org.apache.commons.io.IOUtils
+import java.net.URL
+import java.nio.charset.Charset
+import org.apache.spark.sql._
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+import sqlContext.implicits._
+
+val bankText = sc.textFile("https://s3.amazonaws.com/apache-zeppelin/tutorial/bank/bank.csv")
+
+val bankText = sc.parallelize(IOUtils.toString(new URL("https://s3.amazonaws.com/apache-zeppelin/tutorial/bank/bank.csv"),Charset.forName("utf8")).split("\n"))
+val bankText2 = bankText.mapPartitionsWithIndex { (idx, iter) => if (idx == 0) iter.drop(1) else iter }.map(line=>line.replace("\"","")).map(line=>line.split(";"))
+case class Bank(age: Integer, job: String, marital: String, education: String, balance: Integer)
+val bankDF=bankText2.map(cols=>Bank(cols(0).toInt,cols(1),cols(2),cols(3),cols(5).toInt)).toDF
+bankDF.registerTempTable("banks")
+
+%spark.sql 
+select job,count(1) as count  from banks group by job
+
+%spark.sql 
+select age, count(1) value from banks where age < 30 group by age order by age
+
+%spark.sql 
+select age, count(1) value from bank where age < ${maxAge=30} group by age order by age
+
+%spark.sql 
+select age, count(1) value from bank where marital="${marital=single,single|divorced|married}"  group by age order by age
+
+
+
+
