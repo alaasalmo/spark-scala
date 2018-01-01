@@ -46,6 +46,8 @@ val results=flightsDF.select($"UniqueCarrier",$"TailNum".substr(length($"TailNum
 val groupDF=results.groupBy($"UniqueCarrier").count
 val joinedDF=groupDF.join(carriersDF,groupDF("UniqueCarrier")===carriersDF("Code"))
 
+val joinedDF=groupDF.join(carriersDF,groupDF("UniqueCarrier")===carriersDF("Code"),"right")
+val joinedDF=groupDF.join(carriersDF,groupDF("UniqueCarrier")===carriersDF("Code"),"left")
 
 //val results2=results.distinct
 
