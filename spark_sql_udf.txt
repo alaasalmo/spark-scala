@@ -1,0 +1,27 @@
+
+
+
+val toDouble = udf[Double, String]( _.toDouble)
+groupDF.select($"UniqueCarrier",toDouble($"count".cast("string"))).show
+
+
+
+val toInt    = udf[Int, String]( _.toInt)
+val toDouble = udf[Double, String]( _.toDouble)
+val toHour   = udf((t: String) => "%04d".format(t.toInt).take(2).toInt ) 
+val days_since_nearest_holidays = udf( 
+  (year:String, month:String, dayOfMonth:String) => year.toInt + 27 + month.toInt-12
+ )
+ 
+val featureDf = df
+.withColumn("departureDelay", toDouble(df("DepDelay")))
+.withColumn("departureHour",  toHour(df("CRSDepTime")))
+.withColumn("dayOfWeek",      toInt(df("DayOfWeek")))              
+.withColumn("dayOfMonth",     toInt(df("DayofMonth")))              
+.withColumn("month",          toInt(df("Month")))              
+.withColumn("distance",       toDouble(df("Distance")))              
+.withColumn("nearestHoliday", days_since_nearest_holidays(
+              df("Year"), df("Month"), df("DayofMonth"))
+            )              
+.select("departureDelay", "departureHour", "dayOfWeek", "dayOfMonth", 
+        "month", "distance", "nearestHoliday
