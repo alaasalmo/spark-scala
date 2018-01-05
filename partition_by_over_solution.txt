@@ -1,0 +1,46 @@
+Case(1): RDD
+
+val customers = sc.parallelize(List(("Alice", "2016-05-01", 50.00),("Alice", "2016-05-03", 45.00),("Alice", "2016-05-04", 55.00),("Bob", "2016-05-01", 25.00),("Bob", "2016-05-04", 29.00),("Bob", "2016-05-05", 24.00),("Bob", "2016-05-06", 27.00)))
+val customersPair= customers.map(x=>(x._1,(x._2,x._3)))
+val c=customersPair.aggregateByKey(List[Any]())((aggr, value) => aggr ::: (value :: Nil), (aggr1, aggr2) => aggr1 ::: aggr2)
+
+
+import scala.collection.mutable.ListBuffer
+
+def acc2(l1:List[Any]):List[(String,Double)]= { 
+var initialList = new ListBuffer[(String,Double)]()
+for(ll1<-l1){ initialList+=(ll1.asInstanceOf[(String,Double)]._1,ll1.asInstanceOf[(String,Double)]._2).asInstanceOf[(String,Double)] } 
+initialList.toList
+}
+
+def addCount(l:List[(String,Double)]):List[(String,Double,Integer)] =
+{
+  var i:Int = 0;var ini = new ListBuffer[(String,Double,Integer)]()
+  for(ll1<-l) {i+=1; ini+=(ll1.asInstanceOf[(String,Double)]._1,ll1.asInstanceOf[(String,Double)]._2,i).asInstanceOf[(String,Double,Integer)];}
+  ini.toList
+  
+}
+
+val pp=c.map(x=>(x._1,acc2(x._2).sortBy(_._1))).mapValues(x=>addCount(x))
+
+Case(2): Dataframe
+
+import org.apache.spark.sql.expressions.Window
+
+val customers = sc.parallelize(List(("Alice", "2016-05-01", 50.00),("Alice", "2016-05-03", 45.00),("Alice", "2016-05-04", 55.00),("Bob", "2016-05-01", 25.00),("Bob", "2016-05-04", 29.00),("Bob", "2016-05-05", 24.00),("Bob", "2016-05-06", 27.00))).toDF("name", "date", "amountSpent")
+val wSpec3 = Window.partitionBy("name").orderBy("date")
+customers.withColumn( "rank", rank().over(wSpec3) ).show()
+
+
+case(3): SQL query
+
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, DoubleType};
+import org.apache.spark.sql.Row
+
+val customers = sc.parallelize(List(("Alice", "2016-05-01", 50.00),("Alice", "2016-05-03", 45.00),("Alice", "2016-05-04", 55.00),("Bob", "2016-05-01", 25.00),("Bob", "2016-05-04", 29.00),("Bob", "2016-05-05", 24.00),("Bob", "2016-05-06", 27.00)))
+val customersSchema = StructType(Array(StructField("Name", StringType, true),StructField("Date", StringType, true),StructField("Amount", DoubleType, true)));
+val customersRw = customers.map(cols=>Row(cols._1,cols._2,cols._3))
+val customersDF = sqlContext.createDataFrame(customersRw,customersSchema)
+customersDF.registerTempTable("customers")
+
+sqlContext.sql("SELECT Name,Date,Amount, RANK() OVER (partition by Name ORDER BY Date) AS rank FROM customers").show
